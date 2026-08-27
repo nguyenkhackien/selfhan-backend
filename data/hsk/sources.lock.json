@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-27",
+  "sources": {
+    "hsk": {
+      "repository": "https://github.com/drkameleon/complete-hsk-vocabulary",
+      "license": "MIT",
+      "revision": "7ac65bf1a6387d35f1ade478906172a19311c7f9",
+      "files": {
+        "new-1.json": "7ebcdbd2548ebdcf2413713d975ce095065f0f3447a5967e9caa4f4bf3d82c26",
+        "new-2.json": "77f325f8a664a6179e664a94e810c36c134963a8cc575cc2b6a8e3eed2342997",
+        "new-3.json": "ee322faf86bab14d719f356748b3adb4f07000d8dfa6e73d3ba60cefa938f0d5",
+        "new-4.json": "7e0695b3e62174f646b9dd588424b7c2c0a38d2d33e7368e52fbc93ca770c9b3",
+        "new-5.json": "4e76a8ff6cd8755c6be61268bd102d08b4182f52d49202a8dea37fcc2dd0e5bf",
+        "new-6.json": "03cac80f1bee6433dddbc1d83c77c582ea6f5ba5b47bcd83ff266b03d2ac2ee7",
+        "new-7.json": "8f74a29b946dc724ebf54d9b7290ffe575fbf785346390606304a9cbaa3ddb48"
+      }
+    },
+    "cvdict": {
+      "repository": "https://github.com/ph0ngp/CVDICT",
+      "license": "CC BY-SA 4.0",
+      "revision": "c379d909e308343a247e51619f7839a2060a271c",
+      "files": {
+        "CVDICT.u8": "4dde4b204193efa9c192d7f7daeab1bb579c8ccd7c41ed90d1b6caee22ba0948"
+      }
+    },
+    "kaiHanzi": {
+      "repository": "https://github.com/binhbuithithanh/hanzi-sino-vietnamese",
+      "license": "CC BY 4.0",
+      "revision": "49e5d28ce44ae737bcfc8c1de8f1b26cfdf6dbbd",
+      "files": {
+        "characters.json": "7beaccedeb83d8ed9b8b0d0aa697016fa7faf9de3ed7b79c6bffc25ddcb78ef4"
+      }
+    },
+    "unihan": {
+      "archive": "https://www.unicode.org/Public/17.0.0/ucd/Unihan.zip",
+      "license": "Unicode License v3",
+      "version": "17.0.0",
+      "files": {
+        "Unihan_Readings.txt": "575e69c9ad85a4737a889a4f94cbd987042a90a1a6cc16dd3f4ed995c715b17c"
+      }
+    }
+  }
+}

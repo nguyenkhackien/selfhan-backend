@@ -9,6 +9,7 @@ import { JsonLoggerService } from "./infrastructure/logging/json-logger.service"
 import { HealthModule } from "./modules/health/health.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CurriculumModule } from "./modules/curriculum/curriculum.module";
+import { HskDataModule } from "./modules/hsk-data/hsk-data.module";
 import { AccessTokenGuard } from "./modules/auth/presentation/access-token.guard";
 import { RolesGuard } from "./modules/auth/presentation/roles.guard";
 
@@ -22,6 +23,7 @@ import { RolesGuard } from "./modules/auth/presentation/roles.guard";
     HealthModule,
     AuthModule,
     CurriculumModule,
+    HskDataModule,
   ],
   providers: [
     HttpExceptionFilter,

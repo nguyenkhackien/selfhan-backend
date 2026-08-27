@@ -11,3 +11,6 @@ coverage
 test-results
 playwright-report
 .DS_Store
+
+# Rebuild-only copies of upstream HSK sources; only normalized output is versioned.
+/data/hsk/.source-cache/

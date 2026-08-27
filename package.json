@@ -22,7 +22,9 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/typeorm.data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/infrastructure/database/typeorm.data-source.ts",
     "migration:status": "typeorm-ts-node-commonjs migration:show -d src/infrastructure/database/typeorm.data-source.ts",
-    "seed:demo": "ts-node src/infrastructure/database/seed.ts"
+    "seed:demo": "ts-node src/infrastructure/database/seed.ts",
+    "hsk:build": "ts-node scripts/build-hsk-dataset.ts",
+    "hsk:import": "ts-node src/infrastructure/database/import-hsk.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
