@@ -12,6 +12,12 @@ async function bootstrap(): Promise<void> {
 
   app.useLogger(logger);
   app.setGlobalPrefix("api/v1");
+
+  app.enableCors({
+    origin: config.getOrThrow<string>("FRONTEND_ORIGIN"),
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

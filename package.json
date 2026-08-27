@@ -21,20 +21,27 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate src/infrastructure/database/migrations/generated -d src/infrastructure/database/typeorm.data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/typeorm.data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/infrastructure/database/typeorm.data-source.ts",
-    "migration:status": "typeorm-ts-node-commonjs migration:show -d src/infrastructure/database/typeorm.data-source.ts"
+    "migration:status": "typeorm-ts-node-commonjs migration:show -d src/infrastructure/database/typeorm.data-source.ts",
+    "seed:demo": "ts-node src/infrastructure/database/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.11",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.11",
     "@nestjs/typeorm": "^11.0.0",
+    "argon2": "^0.45.1",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.1",
+    "class-validator": "^0.14.4",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.22",
+    "uuid": "^14.0.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -45,6 +52,8 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.19.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.3",

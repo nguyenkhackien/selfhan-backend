@@ -10,7 +10,7 @@ export default new DataSource({
   entities: [
     join(
       __dirname,
-      "../../modules/**/infrastructure/persistence/*{.entity.ts,.entity.js}",
+      "../../modules/**/infrastructure/persistence/*{.orm-entity.ts,.orm-entity.js,.entity.ts,.entity.js}",
     ),
   ],
   migrations: [join(__dirname, "migrations/*{.ts,.js}")],

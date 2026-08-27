@@ -26,6 +26,26 @@ npm run start:dev
 
 Ứng dụng chạy mặc định tại `http://localhost:3000`.
 
+## Chạy bằng Docker
+
+Cài Docker Desktop, sau đó tạo file local từ mẫu:
+
+```bash
+cp .env.example .env
+# Thay các placeholder secret bằng giá trị sinh ngẫu nhiên.
+docker compose up --build
+```
+
+Stack khởi động PostgreSQL, chạy migration và seed demo một lần, rồi mở API tại
+`http://localhost:3000/api/v1`. Để xoá cả database local:
+
+```bash
+docker compose down -v
+```
+
+`DATABASE_URL` trong `.env` dùng `localhost` cho chạy NestJS trực tiếp. Compose
+tự đổi hostname sang service `db` bên trong network Docker.
+
 ## Environment
 
 | Biến | Bắt buộc | Mô tả |
@@ -33,6 +53,12 @@ npm run start:dev
 | `NODE_ENV` | Có | `development`, `test` hoặc `production` |
 | `PORT` | Có | Cổng HTTP, mặc định `3000` |
 | `DATABASE_URL` | Có | PostgreSQL connection URL |
+| `JWT_ACCESS_SECRET` | Có | Secret tối thiểu 32 ký tự để ký access token |
+| `JWT_ACCESS_EXPIRATION` | Không | Thời hạn access token, mặc định `15m` |
+| `FRONTEND_ORIGIN` | Có | Origin frontend được phép gửi cookie credentialed |
+| `POSTGRES_DB` | Compose | Tên database PostgreSQL local |
+| `POSTGRES_USER` | Compose | Tài khoản PostgreSQL local |
+| `POSTGRES_PASSWORD` | Compose | Mật khẩu PostgreSQL local |
 
 Environment được validate ngay khi ứng dụng khởi động. Không commit file `.env`.
 
@@ -44,6 +70,15 @@ Tất cả endpoint sử dụng prefix `/api/v1`.
 | --- | --- |
 | `GET /api/v1/health/live` | Liveness: process còn hoạt động |
 | `GET /api/v1/health/ready` | Readiness: kiểm tra kết nối PostgreSQL |
+| `POST /api/v1/auth/register` | Tạo learner và trả access token + refresh cookie |
+| `POST /api/v1/auth/login` | Đăng nhập và xoay refresh cookie |
+| `POST /api/v1/auth/refresh` | Đổi refresh cookie lấy access token mới |
+| `POST /api/v1/auth/logout` | Thu hồi refresh session nếu có và xoá cookie |
+| `GET /api/v1/auth/me` | Lấy profile bằng Bearer access token |
+| `GET /api/v1/levels` | Danh sách Level đã publish theo thứ tự |
+| `GET /api/v1/levels/:slug` | Level và Unit đã publish |
+| `GET /api/v1/units/:slug` | Unit và Lesson đã publish |
+| `GET /api/v1/lessons/:slug` | Lesson với từ vựng, ví dụ và ngữ pháp đã publish |
 
 Mỗi response trả header `x-request-id`. Error dùng envelope an toàn:
 
@@ -70,6 +105,7 @@ npm run typecheck        # TypeScript check
 npm test                 # Unit tests
 npm run test:integration # Integration tests
 npm run test:cov         # Unit-test coverage
+npm run seed:demo        # Seed curriculum demo, chỉ development/test
 ```
 
 ## Database và migration
@@ -81,9 +117,21 @@ npm run migration:generate
 npm run migration:status
 npm run migration:run
 npm run migration:revert
+npm run seed:demo
 ```
 
 Các lệnh migration đọc `DATABASE_URL` từ environment. Không sửa migration đã chạy trên production.
+`seed:demo` bị từ chối khi `NODE_ENV=production`, có thể chạy lặp lại và chỉ
+ghi dữ liệu tiếng Trung/Vietnamese do dự án tự biên soạn.
+
+## Authentication và content foundation
+
+Mọi route đều nằm dưới `/api/v1`. Access token gửi bằng header
+`Authorization: Bearer <token>`. Refresh token là chuỗi ngẫu nhiên, chỉ được
+lưu dạng hash ở database và được gửi trong cookie `selfhan_refresh` có
+`HttpOnly`, `SameSite=Strict`, path `/api/v1/auth`; cookie chỉ có cờ `Secure`
+khi production. Request/response đầy đủ được đề xuất tại
+[`source-trust/specs/001-chinese-learning-mvp/contracts/api-v1.md`](../source-trust/specs/001-chinese-learning-mvp/contracts/api-v1.md).
 
 ## Cấu trúc thư mục
 

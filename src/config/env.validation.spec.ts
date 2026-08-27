@@ -1,25 +1,46 @@
 import { validateEnvironment } from "./env.validation";
 
-describe("validateEnvironment", () => {
-  it("returns normalized configuration for valid environment values", () => {
-    expect(
-      validateEnvironment({
-        NODE_ENV: "test",
-        PORT: "3100",
-        DATABASE_URL:
-          "postgres://postgres:postgres@localhost:5432/nestjs_base_test",
-      }),
-    ).toEqual({
-      NODE_ENV: "test",
-      PORT: 3100,
-      DATABASE_URL:
-        "postgres://postgres:postgres@localhost:5432/nestjs_base_test",
-    });
+describe("Environment Validation", () => {
+  const validEnv = {
+    NODE_ENV: "development",
+    PORT: "3000",
+    DATABASE_URL: "postgres://postgres:postgres@localhost:5432/nestjs_base",
+    JWT_ACCESS_SECRET: "test-access-secret-key-at-least-32-characters",
+    JWT_ACCESS_EXPIRATION: "15m",
+    FRONTEND_ORIGIN: "http://localhost:3001",
+  };
+
+  it("should validate valid environment", () => {
+    const result = validateEnvironment(validEnv);
+    expect(result).toBeDefined();
+    expect(result.NODE_ENV).toBe("development");
+    expect(result.PORT).toBe(3000);
   });
 
-  it("rejects missing database URLs during startup", () => {
+  it("should fail with short JWT_ACCESS_SECRET", () => {
     expect(() =>
-      validateEnvironment({ NODE_ENV: "test", PORT: "3000" }),
-    ).toThrow("Invalid environment configuration");
+      validateEnvironment({
+        ...validEnv,
+        JWT_ACCESS_SECRET: "short",
+      }),
+    ).toThrow();
+  });
+
+  it("should fail with invalid FRONTEND_ORIGIN", () => {
+    expect(() =>
+      validateEnvironment({
+        ...validEnv,
+        FRONTEND_ORIGIN: "not-a-url",
+      }),
+    ).toThrow();
+  });
+
+  it("should fail with missing DATABASE_URL", () => {
+    expect(() =>
+      validateEnvironment({
+        ...validEnv,
+        DATABASE_URL: undefined,
+      }),
+    ).toThrow();
   });
 });

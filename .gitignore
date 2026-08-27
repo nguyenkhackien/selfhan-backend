@@ -5,3 +5,9 @@ coverage
 .env.*
 !.env.example
 *.tsbuildinfo
+
+# Local editor and test runtime artifacts
+.history
+test-results
+playwright-report
+.DS_Store
