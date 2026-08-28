@@ -46,6 +46,23 @@ docker compose down -v
 `DATABASE_URL` trong `.env` dùng `localhost` cho chạy NestJS trực tiếp. Compose
 tự đổi hostname sang service `db` bên trong network Docker.
 
+### Phát triển với hot reload
+
+Image runtime trong `compose.yaml` giữ nguyên cho luồng production. Khi phát
+triển backend trong Docker, chạy override sau ở lần đầu (hoặc khi dependency,
+Dockerfile, migration/seed thay đổi):
+
+```sh
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+`compose.dev.yaml` mount source hiện tại vào `/app`, dùng `npm run start:dev`,
+và giữ `/app/node_modules` trong named volume `selfhan_backend_node_modules`.
+Sau khi stack đã chạy, chỉ cần lưu thay đổi TypeScript; Nest watch tự reload,
+không cần build image lại. Dừng bằng
+`docker compose -f compose.yaml -f compose.dev.yaml down`; chỉ dùng cùng lệnh
+với cờ `-v` khi chủ động muốn xoá cả PostgreSQL và dependency volume cục bộ.
+
 ## Environment
 
 | Biến                    | Bắt buộc | Mô tả                                             |

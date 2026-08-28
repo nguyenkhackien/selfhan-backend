@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      target: build
+    environment:
+      NODE_ENV: development
+    command: npm run start:dev
+    volumes:
+      - .:/app
+      - selfhan_backend_node_modules:/app/node_modules
+
+volumes:
+  selfhan_backend_node_modules:
