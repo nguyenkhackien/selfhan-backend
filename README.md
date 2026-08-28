@@ -66,19 +66,22 @@ Environment được validate ngay khi ứng dụng khởi động. Không commi
 
 Tất cả endpoint sử dụng prefix `/api/v1`.
 
-| Endpoint                     | Mục đích                                         |
-| ---------------------------- | ------------------------------------------------ |
-| `GET /api/v1/health/live`    | Liveness: process còn hoạt động                  |
-| `GET /api/v1/health/ready`   | Readiness: kiểm tra kết nối PostgreSQL           |
-| `POST /api/v1/auth/register` | Tạo learner và trả access token + refresh cookie |
-| `POST /api/v1/auth/login`    | Đăng nhập và xoay refresh cookie                 |
-| `POST /api/v1/auth/refresh`  | Đổi refresh cookie lấy access token mới          |
-| `POST /api/v1/auth/logout`   | Thu hồi refresh session nếu có và xoá cookie     |
-| `GET /api/v1/auth/me`        | Lấy profile bằng Bearer access token             |
-| `GET /api/v1/levels`         | Danh sách Level đã publish theo thứ tự           |
-| `GET /api/v1/levels/:slug`   | Level và Unit đã publish                         |
-| `GET /api/v1/units/:slug`    | Unit và Lesson đã publish                        |
-| `GET /api/v1/lessons/:slug`  | Lesson với từ vựng, ví dụ và ngữ pháp đã publish |
+| Endpoint                         | Mục đích                                               |
+| -------------------------------- | ------------------------------------------------------ |
+| `GET /api/v1/health/live`        | Liveness: process còn hoạt động                        |
+| `GET /api/v1/health/ready`       | Readiness: kiểm tra kết nối PostgreSQL                 |
+| `POST /api/v1/auth/register`     | Tạo learner và trả access token + refresh cookie       |
+| `POST /api/v1/auth/login`        | Đăng nhập và xoay refresh cookie                       |
+| `POST /api/v1/auth/refresh`      | Đổi refresh cookie lấy access token mới                |
+| `POST /api/v1/auth/logout`       | Thu hồi refresh session nếu có và xoá cookie           |
+| `GET /api/v1/auth/me`            | Lấy profile bằng Bearer access token                   |
+| `GET /api/v1/levels`             | Danh sách Level đã publish theo thứ tự                 |
+| `GET /api/v1/levels/:slug`       | Level và Unit đã publish                               |
+| `GET /api/v1/units/:slug`        | Unit và Lesson đã publish                              |
+| `GET /api/v1/lessons/:slug`      | Lesson với từ vựng, ví dụ và ngữ pháp đã publish       |
+| `GET /api/v1/hsk/bands`          | Bảy băng hiển thị HSK cùng số lượng từ đã nhập         |
+| `GET /api/v1/hsk/vocabulary`     | Trang từ HSK công khai, lọc theo băng/truy vấn/cursor  |
+| `GET /api/v1/hsk/vocabulary/:id` | Một từ HSK cùng các nghĩa tiếng Việt theo thứ tự nguồn |
 
 Mỗi response trả header `x-request-id`. Error dùng envelope an toàn:
 
@@ -128,6 +131,15 @@ Importer chia dữ liệu thành transaction nhỏ và upsert theo băng HSK + c
 giản thể, vì vậy có thể chạy lại snapshot mà không tạo bản ghi trùng. Các mục
 thiếu nghĩa tiếng Việt hoặc âm Hán Việt được giữ lại với trạng thái
 needs_review; xem data/hsk/review-report.json để rà soát.
+
+## Đọc từ vựng HSK
+
+Ba endpoint HSK là công khai và chỉ đọc: `/hsk/bands`,
+`/hsk/vocabulary`, và `/hsk/vocabulary/:id`. Danh sách nhận `band` từ `1` đến
+`7` (7 hiển thị là HSK 7–9), `query` dài tối đa 100 ký tự, `cursor` opaque và
+`limit` từ 1 đến 50; mặc định là 24. Kết quả giữ thứ tự nguồn và trả
+`nextCursor` khi còn trang tiếp theo. Các route này chỉ đọc bảng HSK cục bộ,
+không gọi dịch vụ từ điển hay dịch thuật bên ngoài.
 
 ## Database và migration
 
