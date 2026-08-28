@@ -10,6 +10,8 @@ import { HealthModule } from "./modules/health/health.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CurriculumModule } from "./modules/curriculum/curriculum.module";
 import { HskDataModule } from "./modules/hsk-data/hsk-data.module";
+import { LearningStateModule } from "./modules/learning-state/learning-state.module";
+import { AdminContentModule } from "./modules/admin-content/admin-content.module";
 import { AccessTokenGuard } from "./modules/auth/presentation/access-token.guard";
 import { RolesGuard } from "./modules/auth/presentation/roles.guard";
 
@@ -24,6 +26,8 @@ import { RolesGuard } from "./modules/auth/presentation/roles.guard";
     AuthModule,
     CurriculumModule,
     HskDataModule,
+    LearningStateModule,
+    AdminContentModule,
   ],
   providers: [
     HttpExceptionFilter,

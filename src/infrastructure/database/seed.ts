@@ -1,3 +1,5 @@
+/* Seed raw query rows are narrowed by their fixed RETURNING/select shape. */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import "reflect-metadata";
 import { DataSource, EntityManager } from "typeorm";
 import dataSource from "./typeorm.data-source";
@@ -148,6 +150,72 @@ async function seedDemoCurriculum(manager: EntityManager): Promise<void> {
         sortOrder: 1,
       }),
     );
+  }
+
+  const [existingQuiz] = await manager.query(
+    `SELECT "id" FROM "quizzes" WHERE "lessonId" = $1 AND "title" = $2 LIMIT 1`,
+    [lesson.id, "Ôn tập: Nói lời chào"],
+  );
+  const quiz =
+    existingQuiz ??
+    (
+      await manager.query(
+        `INSERT INTO "quizzes" ("lessonId", "title", "kind", "passingScore", "status")
+         VALUES ($1, $2, 'lesson', 70, 'published') RETURNING "id"`,
+        [lesson.id, "Ôn tập: Nói lời chào"],
+      )
+    )[0];
+
+  const quizQuestions = [
+    {
+      type: "hanzi_to_meaning",
+      prompt: "你好 nghĩa là gì?",
+      options: [
+        ["xin chào", true],
+        ["cảm ơn", false],
+        ["tạm biệt", false],
+        ["xin lỗi", false],
+      ],
+    },
+    {
+      type: "meaning_to_hanzi",
+      prompt: "Chọn chữ Hán cho nghĩa: cảm ơn.",
+      options: [
+        ["你好", false],
+        ["谢谢", true],
+        ["再见", false],
+        ["请", false],
+      ],
+    },
+  ] as const;
+
+  for (const [questionIndex, item] of quizQuestions.entries()) {
+    const [existingQuestion] = await manager.query(
+      `SELECT "id" FROM "quiz_questions" WHERE "quizId" = $1 AND "sortOrder" = $2`,
+      [quiz.id, questionIndex + 1],
+    );
+    const question =
+      existingQuestion ??
+      (
+        await manager.query(
+          `INSERT INTO "quiz_questions" ("quizId", "type", "prompt", "sortOrder")
+           VALUES ($1, $2, $3, $4) RETURNING "id"`,
+          [quiz.id, item.type, item.prompt, questionIndex + 1],
+        )
+      )[0];
+    for (const [optionIndex, [label, isCorrect]] of item.options.entries()) {
+      const [existingOption] = await manager.query(
+        `SELECT "id" FROM "quiz_options" WHERE "questionId" = $1 AND "sortOrder" = $2`,
+        [question.id, optionIndex + 1],
+      );
+      if (!existingOption) {
+        await manager.query(
+          `INSERT INTO "quiz_options" ("questionId", "label", "isCorrect", "sortOrder")
+           VALUES ($1, $2, $3, $4)`,
+          [question.id, label, isCorrect, optionIndex + 1],
+        );
+      }
+    }
   }
 }
 

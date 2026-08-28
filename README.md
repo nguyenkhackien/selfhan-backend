@@ -66,22 +66,31 @@ Environment được validate ngay khi ứng dụng khởi động. Không commi
 
 Tất cả endpoint sử dụng prefix `/api/v1`.
 
-| Endpoint                         | Mục đích                                               |
-| -------------------------------- | ------------------------------------------------------ |
-| `GET /api/v1/health/live`        | Liveness: process còn hoạt động                        |
-| `GET /api/v1/health/ready`       | Readiness: kiểm tra kết nối PostgreSQL                 |
-| `POST /api/v1/auth/register`     | Tạo learner và trả access token + refresh cookie       |
-| `POST /api/v1/auth/login`        | Đăng nhập và xoay refresh cookie                       |
-| `POST /api/v1/auth/refresh`      | Đổi refresh cookie lấy access token mới                |
-| `POST /api/v1/auth/logout`       | Thu hồi refresh session nếu có và xoá cookie           |
-| `GET /api/v1/auth/me`            | Lấy profile bằng Bearer access token                   |
-| `GET /api/v1/levels`             | Danh sách Level đã publish theo thứ tự                 |
-| `GET /api/v1/levels/:slug`       | Level và Unit đã publish                               |
-| `GET /api/v1/units/:slug`        | Unit và Lesson đã publish                              |
-| `GET /api/v1/lessons/:slug`      | Lesson với từ vựng, ví dụ và ngữ pháp đã publish       |
-| `GET /api/v1/hsk/bands`          | Bảy băng hiển thị HSK cùng số lượng từ đã nhập         |
-| `GET /api/v1/hsk/vocabulary`     | Trang từ HSK công khai, lọc theo băng/truy vấn/cursor  |
-| `GET /api/v1/hsk/vocabulary/:id` | Một từ HSK cùng các nghĩa tiếng Việt theo thứ tự nguồn |
+| Endpoint                                          | Mục đích                                                                   |
+| ------------------------------------------------- | -------------------------------------------------------------------------- |
+| `GET /api/v1/health/live`                         | Liveness: process còn hoạt động                                            |
+| `GET /api/v1/health/ready`                        | Readiness: kiểm tra kết nối PostgreSQL                                     |
+| `POST /api/v1/auth/register`                      | Tạo learner và trả access token + refresh cookie                           |
+| `POST /api/v1/auth/login`                         | Đăng nhập và xoay refresh cookie                                           |
+| `POST /api/v1/auth/refresh`                       | Đổi refresh cookie lấy access token mới                                    |
+| `POST /api/v1/auth/logout`                        | Thu hồi refresh session nếu có và xoá cookie                               |
+| `GET /api/v1/auth/me`                             | Lấy profile bằng Bearer access token                                       |
+| `GET /api/v1/levels`                              | Danh sách Level đã publish theo thứ tự                                     |
+| `GET /api/v1/levels/:slug`                        | Level và Unit đã publish                                                   |
+| `GET /api/v1/units/:slug`                         | Unit và Lesson đã publish                                                  |
+| `GET /api/v1/lessons/:slug`                       | Lesson với từ vựng, ví dụ và ngữ pháp đã publish                           |
+| `GET /api/v1/hsk/bands`                           | Bảy băng hiển thị HSK cùng số lượng từ đã nhập                             |
+| `GET /api/v1/hsk/vocabulary`                      | Trang từ HSK công khai, lọc theo băng/truy vấn/cursor                      |
+| `GET /api/v1/hsk/vocabulary/:id`                  | Một từ HSK cùng các nghĩa tiếng Việt theo thứ tự nguồn                     |
+| `GET /api/v1/lessons/:id/quizzes`                 | Quiz đã publish của bài học, cần Bearer token                              |
+| `GET /api/v1/units/:id/quizzes`                   | Quiz tổng ôn đã publish của chủ đề, cần Bearer token                       |
+| `GET /api/v1/quizzes/:id`                         | Prompt/options quiz; không trả đáp án đúng                                 |
+| `POST /api/v1/quizzes/:id/attempts`               | Nộp lựa chọn để server chấm và lưu kết quả                                 |
+| `GET, POST /api/v1/lessons/:id/progress`          | Đọc/cập nhật phần đã học và completion dẫn xuất                            |
+| `GET /api/v1/dashboard`, `GET /api/v1/statistics` | Tổng quan tiến độ và thống kê learner                                      |
+| `GET /api/v1/reviews/due`, `POST /api/v1/reviews` | Hàng đợi và kết quả ôn SRS                                                 |
+| `PUT, DELETE /api/v1/vocabulary/:id/tags/:tag`    | Gắn hoặc bỏ nhãn `favorite`/`difficult`                                    |
+| `/api/v1/admin/:resource`                         | CRUD role-admin cho curriculum và quiz; archive qua `POST .../:id/archive` |
 
 Mỗi response trả header `x-request-id`. Error dùng envelope an toàn:
 
@@ -165,6 +174,16 @@ lưu dạng hash ở database và được gửi trong cookie `selfhan_refresh` 
 `HttpOnly`, `SameSite=Strict`, path `/api/v1/auth`; cookie chỉ có cờ `Secure`
 khi production. Request/response đầy đủ được đề xuất tại
 [`source-trust/specs/001-chinese-learning-mvp/contracts/api-v1.md`](../source-trust/specs/001-chinese-learning-mvp/contracts/api-v1.md).
+
+## Learning state và quản trị nội dung
+
+Quiz, completion bài học, dashboard, SRS, tags và thống kê đều cần Bearer
+access token. Server tự lấy người học từ token, tự chấm đáp án, và không bao
+giờ gửi `isCorrect` trước lúc nộp quiz. Queue SRS nhận `limit` 1–50 và cursor
+opaque. Tài khoản `admin` có thể quản lý `levels`, `units`, `lessons`,
+`vocabulary`, `grammar-points`, `quizzes`, `quiz-questions`, và `quiz-options`.
+Quiz phải được tạo ở trạng thái `draft`, hoàn thiện câu hỏi/đáp án, rồi mới
+chuyển `status` sang `published`.
 
 ## Cấu trúc thư mục
 
