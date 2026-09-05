@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+export const APPLICATION_LOG_LEVELS = [
+  "trace",
+  "debug",
+  "verbose",
+  "info",
+  "warn",
+  "error",
+  "fatal",
+] as const;
+
+export const LOG_FORMATS = ["pretty", "json"] as const;
+
+export type ApplicationLogLevel = (typeof APPLICATION_LOG_LEVELS)[number];
+export type LogFormat = (typeof LOG_FORMATS)[number];
+
 const environmentSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
@@ -9,6 +24,8 @@ const environmentSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRATION: z.string().default("15m"),
   FRONTEND_ORIGIN: z.string().url(),
+  LOG_LEVEL: z.enum(APPLICATION_LOG_LEVELS).default("trace"),
+  LOG_FORMAT: z.enum(LOG_FORMATS).optional(),
 });
 
 export type Environment = z.infer<typeof environmentSchema>;

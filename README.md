@@ -65,17 +65,19 @@ với cờ `-v` khi chủ động muốn xoá cả PostgreSQL và dependency vol
 
 ## Environment
 
-| Biến                    | Bắt buộc | Mô tả                                             |
-| ----------------------- | -------- | ------------------------------------------------- |
-| `NODE_ENV`              | Có       | `development`, `test` hoặc `production`           |
-| `PORT`                  | Có       | Cổng HTTP, mặc định `3000`                        |
-| `DATABASE_URL`          | Có       | PostgreSQL connection URL                         |
-| `JWT_ACCESS_SECRET`     | Có       | Secret tối thiểu 32 ký tự để ký access token      |
-| `JWT_ACCESS_EXPIRATION` | Không    | Thời hạn access token, mặc định `15m`             |
-| `FRONTEND_ORIGIN`       | Có       | Origin frontend được phép gửi cookie credentialed |
-| `POSTGRES_DB`           | Compose  | Tên database PostgreSQL local                     |
-| `POSTGRES_USER`         | Compose  | Tài khoản PostgreSQL local                        |
-| `POSTGRES_PASSWORD`     | Compose  | Mật khẩu PostgreSQL local                         |
+| Biến                    | Bắt buộc | Mô tả                                                     |
+| ----------------------- | -------- | --------------------------------------------------------- |
+| `NODE_ENV`              | Có       | `development`, `test` hoặc `production`                   |
+| `PORT`                  | Có       | Cổng HTTP, mặc định `3000`                                |
+| `DATABASE_URL`          | Có       | PostgreSQL connection URL                                 |
+| `JWT_ACCESS_SECRET`     | Có       | Secret tối thiểu 32 ký tự để ký access token              |
+| `JWT_ACCESS_EXPIRATION` | Không    | Thời hạn access token, mặc định `15m`                     |
+| `FRONTEND_ORIGIN`       | Có       | Origin frontend được phép gửi cookie credentialed         |
+| `LOG_LEVEL`             | Không    | Mức log tối thiểu, mặc định `trace`                       |
+| `LOG_FORMAT`            | Không    | `pretty` hoặc `json`; có giá trị mặc định theo môi trường |
+| `POSTGRES_DB`           | Compose  | Tên database PostgreSQL local                             |
+| `POSTGRES_USER`         | Compose  | Tài khoản PostgreSQL local                                |
+| `POSTGRES_PASSWORD`     | Compose  | Mật khẩu PostgreSQL local                                 |
 
 Environment được validate ngay khi ứng dụng khởi động. Không commit file `.env`.
 
@@ -138,6 +140,24 @@ npm run seed:demo        # Seed curriculum demo, chỉ development/test
 npm run hsk:build        # Build snapshot HSK đã khoá checksum từ source cache local
 npm run hsk:import       # Import snapshot HSK vào PostgreSQL, có thể chạy lặp lại
 ```
+
+## Logging và truy vết request
+
+Logger hỗ trợ các mức `trace`, `debug`, `verbose`, `info`, `warn`, `error`,
+và `fatal`. Khi không cấu hình `LOG_LEVEL`, hệ thống mặc định dùng `trace` để
+theo dõi đầy đủ. Có thể đặt biến này thành cấp cao hơn khi cần giảm log volume.
+`LOG_FORMAT` nhận `pretty` (có màu ANSI theo cấp độ) hoặc `json`. Khi không cấu
+hình, development/test dùng `pretty`, còn production dùng JSON một dòng để log
+collector có thể đọc.
+
+Mỗi request hoàn tất ghi một record với `requestId`, method, route, status và
+duration. Mọi failure đã được filter xử lý ghi đúng một record (`warn` cho 4xx,
+`error` cho 5xx) cùng `requestId`; header `x-request-id` và error envelope API
+không thay đổi. Không ghi request body, query, headers, cookies, access token
+hoặc refresh token. Các trường object có tên nhạy cảm như token, password,
+authorization, secret và credential được che trước khi xuất log.
+`LoggingModule` là global; provider cần log nghiệp vụ có thể inject
+`JsonLoggerService` trực tiếp.
 
 ## Dữ liệu HSK cục bộ
 

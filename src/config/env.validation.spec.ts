@@ -15,6 +15,7 @@ describe("Environment Validation", () => {
     expect(result).toBeDefined();
     expect(result.NODE_ENV).toBe("development");
     expect(result.PORT).toBe(3000);
+    expect(result.LOG_LEVEL).toBe("trace");
   });
 
   it("should fail with short JWT_ACCESS_SECRET", () => {
@@ -41,6 +42,12 @@ describe("Environment Validation", () => {
         ...validEnv,
         DATABASE_URL: undefined,
       }),
+    ).toThrow();
+  });
+
+  it("should fail with an unsupported logging level", () => {
+    expect(() =>
+      validateEnvironment({ ...validEnv, LOG_LEVEL: "loud" }),
     ).toThrow();
   });
 });

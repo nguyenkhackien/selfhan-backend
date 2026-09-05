@@ -4,9 +4,13 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Inject,
 } from "@nestjs/common";
 import { Response } from "express";
+import { JsonLoggerService } from "../../infrastructure/logging/json-logger.service";
 import { RequestWithContext } from "../types/request-context.type";
+
+type FailureLogger = Pick<JsonLoggerService, "error" | "warn">;
 
 type ResponseLocals = { requestId?: string };
 
@@ -19,6 +23,10 @@ type HttpExceptionBody = {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  constructor(
+    @Inject(JsonLoggerService) private readonly logger: FailureLogger,
+  ) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const context = host.switchToHttp();
     const request = context.getRequest<RequestWithContext>();
@@ -27,6 +35,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       request.requestId ?? response.locals.requestId ?? "unknown";
 
     if (!(exception instanceof HttpException)) {
+      this.logFailure(
+        request,
+        requestId,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "INTERNAL_ERROR",
+        exception,
+      );
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         error: {
           code: "INTERNAL_ERROR",
@@ -43,12 +58,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const normalizedBody = this.normalizeBody(body);
     const isValidationError =
       status === 400 && Array.isArray(normalizedBody.message);
+    const code =
+      normalizedBody.code ??
+      (isValidationError ? "VALIDATION_ERROR" : this.codeForStatus(status));
+
+    this.logFailure(request, requestId, status, code, exception);
 
     response.status(status).json({
       error: {
-        code:
-          normalizedBody.code ??
-          (isValidationError ? "VALIDATION_ERROR" : this.codeForStatus(status)),
+        code,
         message: isValidationError
           ? "Request validation failed."
           : this.messageForStatus(status),
@@ -70,6 +88,31 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
 
     return codeByStatus[status] ?? "REQUEST_ERROR";
+  }
+
+  private logFailure(
+    request: RequestWithContext,
+    requestId: string,
+    statusCode: number,
+    code: string,
+    exception: unknown,
+  ): void {
+    const message = {
+      code,
+      errorName: exception instanceof Error ? exception.name : "UnknownError",
+      event: "http.request.failed",
+      method: request.method,
+      path: request.path,
+      requestId,
+      statusCode,
+    };
+
+    if (statusCode >= 500) {
+      this.logger.error(message, HttpExceptionFilter.name);
+      return;
+    }
+
+    this.logger.warn(message, HttpExceptionFilter.name);
   }
 
   private messageForStatus(status: number): string {
